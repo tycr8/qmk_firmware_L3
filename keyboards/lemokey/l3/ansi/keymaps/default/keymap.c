@@ -22,6 +22,8 @@ enum layer_names {
     FN,
 };
 
+#define SWITCH_MODE 0x1688
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [BASE] = LAYOUT_ansi_tkl(
@@ -34,7 +36,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [FN] = LAYOUT_ansi_tkl(
                   RGB_TOG,  _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  RGB_VAD,  RGB_VAI,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,    KC_VOLU,  _______,  _______,  _______,
                   _______,  BT_HST1,  BT_HST2,  BT_HST3,  P2P4G,    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
-        _______,  RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
+        _______,  RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  _______,  _______,  _______,  _______,  SWITCH_MODE,  _______,  _______,    _______,  _______,  _______,  _______,
         _______,  _______,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  _______,  _______,  _______,  _______,  _______,  _______,              _______,
         _______,  _______,            _______,  _______,  _______,  _______,  BAT_LVL,  NK_TOGG,  _______,  _______,  _______,  _______,              _______,            _______,
         _______,  _______,  GUI_TOG,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
@@ -47,10 +49,28 @@ const uint16_t PROGMEM encoder_map[][1][2] = {
 };
 #endif // ENCODER_MAP_ENABLE
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (!process_record_lemokey_common(keycode, record)) {
-        return false;
-    }
+extern uint8_t is_orgb_mode;
 
-    return true;
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+
+    switch (keycode) {
+
+        case SWITCH_MODE:
+
+            #ifdef OPENRGB_ENABLE
+                if (record->event.pressed) {
+                    is_orgb_mode = !is_orgb_mode;
+                }
+            #endif
+            return false;
+
+        default:
+
+            if (!process_record_lemokey_common(keycode, record)) {
+                return false;
+            } else {
+                return true;
+            }
+    }
 }
+
